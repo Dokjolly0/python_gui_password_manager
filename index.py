@@ -1,5 +1,5 @@
 import tkinter as tk
-from pages.register_pages import RegistrationWindow
+from pages.register_page import RegistrationWindow
 from pages.main_page import MainPage
 
 class App:

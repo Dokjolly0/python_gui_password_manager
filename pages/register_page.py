@@ -1,5 +1,7 @@
-import tkinter as tk
+import os
 import re  # Importing regex for email validation
+import tkinter as tk
+from PIL import Image, ImageTk  # Import PIL for image handling
 from utils.database_utils import DBConfig, DatabaseUtils
 from utils.cript_utils import cript_utils
 
@@ -11,6 +13,11 @@ class RegistrationWindow:
         self.registration_window.title("Password Manager - Registrazione")
         self.registration_window.geometry("350x400")
         self.center_window()
+        
+        # Main folder
+        absolute_path = os.path.abspath(__file__)
+        current_directory = os.path.dirname(absolute_path)
+        parent_directory = os.path.dirname(current_directory)
 
         # Create a label for the title
         title_label = tk.Label(self.registration_window, text="Schermata di Registrazione", font=("Arial", 16))
@@ -37,22 +44,52 @@ class RegistrationWindow:
         # Password Field
         label_password = tk.Label(self.registration_window, text="Password:", anchor="w")
         label_password.pack(fill="x", padx=10)
-        self.input_password = tk.Entry(self.registration_window, show="*")
-        self.input_password.pack(fill="x", padx=10)
+
+        # Frame for password entry and eye icon
+        password_frame = tk.Frame(self.registration_window)
+        password_frame.pack(fill="x", padx=10)
+
+        self.input_password = tk.Entry(password_frame, show="*", width=36)
+        self.input_password.grid(row=0, column=0, padx=(0, 5))  # Utilizza grid per il posizionamento
+
+        # Load eye icons
+        self.eye_open_img = ImageTk.PhotoImage(Image.open(f"{parent_directory}/img/eye_visible.png").resize((20, 20)))
+        self.eye_closed_img = ImageTk.PhotoImage(Image.open(f"{parent_directory}/img/eye_hidden.png").resize((20, 20)))
+
+        # Create button for showing/hiding the password
+        self.toggle_password_button = tk.Button(password_frame, image=self.eye_closed_img, command=self.toggle_password_visibility, bg="#f0f0f0", borderwidth=0)
+        self.toggle_password_button.grid(row=0, column=1)  # Allinea l'icona dell'occhio nella stessa riga
 
         # Confirm Password Field
         label_check_password = tk.Label(self.registration_window, text="Conferma Password:", anchor="w")
         label_check_password.pack(fill="x", padx=10)
-        self.input_check_password = tk.Entry(self.registration_window, show="*")
-        self.input_check_password.pack(fill="x", padx=10)
+
+        # Frame for confirm password entry and eye icon
+        check_password_frame = tk.Frame(self.registration_window)
+        check_password_frame.pack(fill="x", padx=10)
+
+        self.input_check_password = tk.Entry(check_password_frame, show="*", width=36)
+        self.input_check_password.grid(row=0, column=0, padx=(0, 5))
+
+        # Create button for showing/hiding confirm password
+        self.toggle_check_password_button = tk.Button(check_password_frame, image=self.eye_closed_img, command=self.toggle_check_password_visibility, bg="#f0f0f0", borderwidth=0)
+        self.toggle_check_password_button.grid(row=0, column=1)
+
+        # Frame for buttons
+        button_frame = tk.Frame(self.registration_window)
+        button_frame.pack(pady=20)
 
         # Registration Button
-        button_registra = tk.Button(self.registration_window, text="Registra", command=self.registra)
-        button_registra.pack(pady=20)
+        button_registra = tk.Button(button_frame, text="Registrati", command=self.registra, width=15)
+        button_registra.grid(row=0, column=1, padx=(0, 10))  # Aggiungi spaziatura a destra
 
         # Result Label
         self.label_result = tk.Label(self.registration_window, text="")
         self.label_result.pack()
+
+        # Switch to login button
+        button_login = tk.Button(button_frame, text="Accedi", command=self.open_login_window, width=15)
+        button_login.grid(row=0, column=0)  # Pulsante di accesso a destra
 
     def center_window(self):
         """Center the window on the screen."""
@@ -62,6 +99,24 @@ class RegistrationWindow:
         x = (self.master.winfo_width() // 2) - (width // 2) + self.master.winfo_x()
         y = (self.master.winfo_height() // 2) - (height // 2) + self.master.winfo_y()
         self.registration_window.geometry(f"{width}x{height}+{x}+{y}")
+
+    def toggle_password_visibility(self):
+        """Toggle the visibility of the password."""
+        if self.input_password.cget('show') == "":
+            self.input_password.config(show="*")
+            self.toggle_password_button.config(image=self.eye_closed_img)  # Set to eye closed icon
+        else:
+            self.input_password.config(show="")
+            self.toggle_password_button.config(image=self.eye_open_img)  # Set to eye open icon
+
+    def toggle_check_password_visibility(self):
+        """Toggle the visibility of the confirm password."""
+        if self.input_check_password.cget('show') == "":
+            self.input_check_password.config(show="*")
+            self.toggle_check_password_button.config(image=self.eye_closed_img)  # Set to eye closed icon
+        else:
+            self.input_check_password.config(show="")
+            self.toggle_check_password_button.config(image=self.eye_open_img)  # Set to eye open icon
 
     def is_valid_email(self, email):
         """Check if the provided email is valid."""
@@ -119,8 +174,6 @@ class RegistrationWindow:
         if cursor is None:
             self.label_result.config(text="Errore nell'esecuzione della query.", fg="red")
             return
-        else: 
-            print(cursor)
 
         email_exists = cursor.fetchone()[0] > 0  # Ottieni il conteggio delle righe
 
@@ -137,3 +190,9 @@ class RegistrationWindow:
         
         # Chiamata al callback per notificare il successo della registrazione
         self.on_success_callback(name, surname, email.lower())
+
+    def open_login_window(self):
+        from pages.login_page import LoginWindow
+        """Placeholder for opening the login window."""
+        self.registration_window.destroy()
+        LoginWindow(self.master, self.on_success_callback)

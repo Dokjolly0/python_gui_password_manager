@@ -1,6 +1,7 @@
 import tkinter as tk
+from tkinter import ttk  # Using ttk for modern widgets
 from pages.login_page import LoginWindow
-from pages.register_pages import RegistrationWindow
+from pages.register_page import RegistrationWindow
 from pages.password_manager_page import PasswordManagerPage
 
 class MainPage:
@@ -10,38 +11,54 @@ class MainPage:
         self.initialize_ui()
 
     def initialize_ui(self):
-        """Inizializza la UI della pagina principale."""
-        title_label = tk.Label(self.main_page, text="Benvenuto nel Password Manager", font=("Arial", 16))
-        title_label.pack(pady=10)
-        # Bottone registrazione
-        button_register = tk.Button(self.main_page, text="Registrati", command=self.open_registration)
-        button_register.pack(pady=20)
-        # Bottone login
-        button_login = tk.Button(self.main_page, text="Accedi", command=self.open_login)
-        button_login.pack(pady=20)
+        """Initialize the UI for the main page."""
+        self.main_page.configure(bg="#f0f0f0")  # Set a light background color
+        title_label = tk.Label(self.main_page, text="Benvenuto nel Password Manager", font=("Arial", 24, "bold"), bg="#f0f0f0")
+        title_label.pack(pady=20)
+
+        # Create a frame for buttons
+        button_frame = ttk.Frame(self.main_page)
+        button_frame.pack(pady=20)
+
+        # Registration button
+        button_register = ttk.Button(button_frame, text="Registrati", command=self.open_registration, width=15)
+        button_register.grid(row=0, column=0, padx=10, pady=10)
+
+        # Login button
+        button_login = ttk.Button(button_frame, text="Accedi", command=self.open_login, width=15)
+        button_login.grid(row=0, column=1, padx=10, pady=10)
+
+        # Add some visual separation
+        separator = ttk.Separator(self.main_page, orient='horizontal')
+        separator.pack(fill='x', pady=20)
+
+        # Footer label
+        footer_label = tk.Label(self.main_page, text="Gestisci le tue password in modo sicuro!", font=("Arial", 10), bg="#f0f0f0")
+        footer_label.pack(pady=10)
 
     def open_registration(self):
-        """Mostra la finestra di registrazione."""
+        """Show the registration window."""
         self.registration_window = RegistrationWindow(self.main_page, self.on_registration_success)
-    
+
     def open_login(self):
-        """Mostra la finestra di login."""
+        """Show the login window."""
         self.login_window = LoginWindow(self.main_page, self.on_login_success)
 
     def on_registration_success(self, name, surname, email):
-        """Callback chiamato al termine della registrazione con successo."""
-        self.user_info = (name, surname, email)  # Aggiorna le informazioni dell'utente
-        #print(f"Registrazione completata per: {name} {surname} ({email})")
+        """Callback called on successful registration."""
+        self.user_info = (name, surname, email)  # Update user info
         self.registration_window.registration_window.destroy()
 
     def on_login_success(self, email):
-        """Callback chiamato al termine del login con successo."""
+        """Callback called on successful login."""
         print(f"User {email} has logged in successfully.")
-        # Chiudi la finestra di login
         self.login_window.login_window.destroy()
-        # Rimuovi tutti i widget dalla pagina principale
+        
+        # Clear the main page
         for widget in self.main_page.winfo_children():
             widget.destroy()
-        # Inizializza PasswordManagerPage come nuova interfaccia della finestra principale
-        self.password_manager_page = PasswordManagerPage(self.main_page)
         
+        # Initialize PasswordManagerPage as new interface for the main window
+        self.password_manager_page = PasswordManagerPage(self.main_page)
+
+# Note: Ensure that the other page classes (LoginWindow, RegistrationWindow, PasswordManagerPage) are similarly modernized.
